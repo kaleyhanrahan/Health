@@ -1,7 +1,14 @@
 # Health
-Interactive visualization of health in the United States using the CDC's 500 cities study.
+Interactive visualization of health in the United States using the CDC's 500 cities study (https://www.cdc.gov/500cities/). 
 
-Health in the United States, especially with respect to health care, is a huge flashpoint in today’s national conversation. With the newly proposed Republican healthcare bill, coverage for people with pre-existing conditions is seriously threatened. Pre-existing conditions are now much more broadly defined, including many mental health problems, high cholesterol, high blood pressure, diabetes, cancer, COPD, or even asthma.
+### Tools
+I used d3.js, a JavaScript library to make the html, svg, and css based visualization interact directly with the data.
+### Files
+1. Clean data from CDC's 500 cities study.
+2. 
+
+### Problem Background
+Health in the United States, especially with respect to health care, is a huge flashpoint in today’s national conversation. With the newly proposed Republican healthcare bill, coverage for people with pre-existing conditions is seriously threatened. Pre-existing conditions are now much more broadly defined, including many mental health problems, high cholesterol, high blood pressure, diabetes, cancer, COPD, and even asthma.
 For this project, I wanted to gain insight into the prevalence of these conditions to get a sense of magnitude of impact these legislative changes might have on our country. The people with these conditions are hugely vulnerable to the final changes made to this bill, as it could make healthcare much more difficult and expensive for them. In order to set the full context necessary to understand this problem, I also explored the data the CDC collected on health insurance coverage across these cities. This allows the viewer to see the 
 
 ### Data Overview
