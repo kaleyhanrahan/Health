@@ -1,0 +1,267 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Data Visualization - Final Project</title>
+    
+    <style>
+        h3{
+            font-family:sans-serif;
+            font-size: 30px;
+            font-weight:bold;
+            color:#01579B;
+            text-align: center;
+        }
+        h4{
+            font-family:sans-serif;
+            font-size: 14px;
+            font-weight:100;
+            color:dimgrey;
+            text-align: left;
+            position: absolute;
+            top: 60px;
+            left: 250px;
+        }
+        body{
+            background-color: white;
+        }
+        .baseline{
+            stroke: #dddddd;
+        }
+        circle{
+            opacity: 0.6;
+        }
+        text{
+            fill:dimgrey;
+            font-size: 14px;
+            font-family:sans-serif;
+        }
+        
+        .one {fill:#B3E5FC; 
+            opacity: 0.98;}         
+        .two {fill: #4FC3F7;}/*#03A9F4;} */      
+        .three {fill: #039BE5;}/*#0288D1;}   */         
+        .four {fill:#0277Bd;}/*#01579B;}*/
+        
+        button {
+            background-color: #ddd;
+            font-weight: light;
+            font-size: 10px;
+            border-radius: 5px;
+            padding: 8px;
+            border: 0;
+        }
+        button:active{
+            background-color: dimgrey;
+            color:lightgrey;
+        }
+        button:focus{
+            background-color: dimgrey; 
+            color:lightgrey;
+        }
+        button:target{
+            background-color: dimgrey; 
+            color:lightgrey;
+        }
+        button:hover {
+            color: white;
+            cursor: pointer;
+            font-size: 12;
+        }
+        
+        #controls1 {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 180px;
+            font-size: 8px;
+            font-family:sans-serif;
+            text-align: left;
+        }
+        #controls2 {
+            position: absolute;
+            top: 450px;
+            left: 20px;
+            width: 200px;
+            font-size: 10px;
+            font-family:sans-serif;
+            text-align: left;
+            font-weight: bold;
+        }
+        #floater{
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: rgba(255,255,255,0.8);
+            box-shadow: 2px 2px 2px #cccccc;
+            padding: 5px;
+            font-size: 12px;
+            visibility: hidden; /* start out hidden on page*/
+        }
+        
+    </style>
+    
+    <script src="http://d3js.org/d3.v4.min.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        var data; // define a container variable to hold the data
+        
+        function getData() {
+            //d3.selectAll("svg > *").remove();   // clear the SVG
+            d3.csv("dfMap_city2.csv", function(d) {
+                data = d;
+                draw();
+            });
+        }
+
+var baseline, meridian, scaleFactor, vScale, rScale;     // declare some global variables
+        
+        function draw()  {
+
+            var target = d3.select("#chart");
+            var targetWidth = +target.attr("width");
+            baseline = +target.attr("height");
+            
+            hScale = 16.5;
+            vScale = 20;
+            rScale = 1;
+            
+            d3.select("#chart").selectAll("circle") //finds object with id name of #
+                .data(data) // bind to data
+                .enter().append("circle") 
+                //.filter(function(d) {return +d["MHLTH"] > 18})
+                    .attr("cx",function(d) {
+                        return ((125 + +d["Long"]) * hScale);}) //starts at 123, ends at 70
+                    .attr("cy", function(d) {return baseline-50 -+d["PHLTH"] * vScale;})
+                    .attr("r", function(d) {return +d["sdACCESS2"] * rScale;})
+                    .attr("class",function(d) {return d["percentACCESS2"];})
+                    .on("mouseover", showFloater)
+                    .on("mouseout", hideFloater);
+        }
+        
+        function changeR(field, scale) {
+            var circles = d3.selectAll("circle").transition().duration(1000)
+                .attr("r",function(d) {return +d[field] * scale;});
+        }
+        
+        function filterHighAccess(value) {
+            d3.selectAll("circle")
+                .data(data)
+                .filter(function(d) {return +d["leastACCESS2"] < value})
+                    .style("fill","green");
+        }
+        function filterLowAccess(value) {
+            d3.selectAll("circle")
+                .data(data)
+                .filter(function(d) {return +d["leastACCESS2"] > value})
+                    .style("fill","orange")
+                    .style("opacity", "0.8");
+        }
+        function filterReset() {
+            d3.selectAll("circle")
+                .data(data)
+                    .style("fill","")
+                    .style("opacity", "");
+        }
+        function changeY(field, scale) {
+            var circles = d3.selectAll("circle").transition().duration(2000)
+                .attr("cy",function(d) {return baseline-50 -+d[field] * vScale * scale;});
+        }
+        
+        function showFloater(d,i){
+            d3.select("#cityName").text(data[i]["CityName"]);
+            d3.select("#stateName").text(data[i]["StateAbbr"]);
+            d3.select("#mhlthScore").text(data[i]["MHLTH"]);
+            d3.select("#phlthScore").text(data[i]["PHLTH"]);
+            d3.select("#Access2").text(data[i]["ACCESS2"]);
+            d3.select("#chol").text(data[i]["HIGHCHOL"]);
+            d3.select("#bp").text(data[i]["BPHIGH"]);
+            d3.select("#sdAccess2").text(data[i]["sdACCESS2"]*rScale);
+            
+            d3.select("#floater")
+                .style("top", d3.event.pageY + "px")
+                .style("left", d3.event.pageX + "px")
+                .style("visibility", "visible")
+            
+            d3.select(this) //backreference to object that created event, the circle being hovered over
+                .style("stroke","black")
+                .style("opacity",".8")
+                .style("stroke-width","3");
+        }
+        
+        function hideFloater(d,i){
+            d3.select("#floater")
+                .style("visibility", "hidden")
+            
+            d3.select(this) //backreference to object that created event, the circle being hovered over
+                .style("stroke", "")
+                .style("opacity","")
+                .style("stroke-width","");
+        }
+        
+    </script>
+</head>
+
+<body onload="getData()">
+    <h3>Health in the United States</h3>
+    <h4>With the newly proposed Republican healthcare bill, coverage for people with pre-existing conditions is seriously threatened.  Pre-existing conditions are now much more broadly defined, including many mental health problems, high cholesterol, high blood pressure, diabetes, cancer, COPD, or even asthma. Below, you can see the cities represented by bubbles from the West Coast to the East Coast. Please use the buttons on the left to change the encoding of the size of the bubbles, the x-axis, and highlight cities of particular interest.</h4>
+    
+    <svg id="chart" width="1000" height="500" style="position:absolute; top:150; left:200">
+        
+        <line x1="20" x2="900" y1="400" y2="400" class="baseline" />
+        <line x1="20" x2="20" y1="0" y2="400" class="baseline" />
+        
+        <text x="10" y="425">West Coast</text>
+        <line x1="50" x2="50" y1="395" y2="405" class="baseline" />
+        
+        <text x="820" y="425">East Coast</text>
+        <line x1="860" x2="860" y1="395" y2="405" class="baseline" />
+        
+        <text x="0" y="320">  5%</text>
+        <text x="0" y="60">20%</text>
+        <line x1="15" x2="25" y1="230" y2="230" class="baseline" />
+        <line x1="15" x2="25" y1="130" y2="130" class="baseline" />
+    </svg>
+    
+    <div id="floater" style="font-family:sans-serif">
+        <span id="cityName" style="font-weight: bold"></span>, 
+        <span id="stateName" style="font-weight: bold"></span> <br />
+        Poor Physical Health:<span id="phlthScore" style="font-weight: bold"></span>%<br />        
+        Poor Mental Health: <span id="mhlthScore" style="font-weight: bold"></span>%<br />
+        Lack of Access: <span id="Access2" style="font-weight: bold"></span>%<br />
+        Disparity in Access (sd): <span id="sdAccess2" style="font-weight: bold"></span><br />
+        High Cholesterol: <span id="chol" style="font-weight: bold"></span>%<br />
+        High Blood Pressure: <span id="bp" style="font-weight: bold"></span>%<br />
+    </div>
+
+    <div id="controls1">
+        <p> <strong style="font-size:15px">Radius</strong> <br>
+            <button onclick="changeR('sdACCESS2', '1')" style="color:#01579B">Disparity in Health Access</button> <br> <br>
+            <button onclick="changeR('PopulationCount', '.00001')">Population Size</button> <br /> <br />
+        </p>
+        <p>
+            <strong style="font-size:15px">Pre-existing Conditions</strong><br />     
+            <strong style="font-size:10px">(changes Y-axis)</strong><br />
+            <button onclick="changeY('PHLTH', '1')">Physical Health Issues</button><br><br>
+            <button onclick="changeY('MHLTH', '1')">Mental Health Issues</button><br><br>
+            <button onclick="changeY('HIGHCHOL', '.5')">High Cholesterol (x0.5)</button><br><br>            
+            <button onclick="changeY('BPHIGH', '.4')">High Blood Pressure (x0.4)</button><br><br>
+            <button onclick="changeY('DIABETES', '1')">Diabetes</button><br><br>
+            <button onclick="changeY('CASTHMA', '1')">Asthma</button><br><br>
+            <button onclick="changeY('CANCER', '1')">Cancer</button><br><br>
+            <button onclick="changeY('COPD', '1')">COPD</button><br><br>
+<br><br><br>
+        </p>
+    </div>
+    
+    <div id="controls2">
+        <p> <strong style="font-size:15px">Access to Healthcare?</strong> <br>
+            <button onclick="filterHighAccess(.1)" style="color:green; font-weight: bold">Top 10%</button> <br /> <br />
+            <button onclick="filterLowAccess(.9)" style="color:orange; font-weight: bold">Bottom 10%</button>  <br /> <br />
+            <button onclick="filterReset()" style="color:white; font-weight: bold">Reset</button>
+        </p>
+    </div>        
+    
+
+</body>
+
+</html>
